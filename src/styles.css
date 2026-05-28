@@ -68,10 +68,10 @@
 }
 
 :root {
-  --ritual-bg: oklch(0.28 0.09 155);
-  --ritual-deep: oklch(0.22 0.07 155);
-  --ritual-card: oklch(0.32 0.08 155);
-  --ritual-line: oklch(0.42 0.06 155 / 0.4);
+  --ritual-bg: oklch(0.14 0.03 155);
+  --ritual-deep: oklch(0.10 0.02 155);
+  --ritual-card: oklch(0.17 0.035 155);
+  --ritual-line: oklch(0.55 0.12 150 / 0.18);
   --ritual-text: oklch(0.96 0.02 150);
   --ritual-accent: oklch(0.86 0.18 150);
 }
