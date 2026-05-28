@@ -54,15 +54,22 @@ export function Leaderboard() {
             >
               <div className="flex items-center gap-3 min-w-0">
                 <span className={`w-6 text-center font-mono ${i < 3 ? "text-ritual-accent font-bold" : "text-ritual-text/50"}`}>
+          {rows.map((r, i) => (
+            <li
+              key={r.txHash}
+              className="flex items-center justify-between gap-3 rounded-lg bg-ritual-deep/60 px-3 py-2 text-sm"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className={`w-6 text-center font-mono ${i < 3 ? "text-ritual-accent font-bold" : "text-ritual-text/50"}`}>
                   {i + 1}
                 </span>
                 <span className="truncate text-ritual-text">{r.discord}</span>
               </div>
-              <span className="font-mono font-semibold text-ritual-accent">{r.score}</span>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="text-[10px] uppercase tracking-wide text-ritual-text/50 font-mono">
+                  {r.questions} Q
+                </span>
+                <span className="font-mono font-semibold text-ritual-accent">{r.score}</span>
+              </div>
             </li>
           ))}
-        </ol>
-      )}
-    </div>
-  );
-}
