@@ -142,12 +142,13 @@ export function MathQuiz() {
       setError(null);
       setPhase("saving");
       const wallet = getWalletClient();
+      const encoded = encodeScore(score, questionNo);
       const hash = await wallet.writeContract({
         account: address as `0x${string}`,
         address: CONTRACT_ADDRESS,
         abi: QUIZ_ABI,
         functionName: "submitScore",
-        args: [discord.trim(), BigInt(score)],
+        args: [discord.trim(), encoded],
       });
       await publicClient.waitForTransactionReceipt({ hash });
       setSaveTx(hash);
