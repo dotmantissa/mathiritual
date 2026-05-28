@@ -12,7 +12,10 @@ export const CONTRACT_ADDRESS = "0x205336D124145881e00dad29aAA9669F739684B2" as 
 export const DEPLOY_BLOCK = 25286727n;
 // Leaderboard reset: only events at or after this Unix timestamp are shown.
 // Bump this to wipe the visible leaderboard without redeploying.
-export const LEADERBOARD_RESET_AT = 1779062400; // 2026-05-28 UTC
+export const LEADERBOARD_RESET_AT = 1779235200; // 2026-05-30 UTC — bumped to wipe board
+// Encoding: on-chain `score` arg = realScore * SCORE_ENCODE_BASE + questionsAnswered
+export const SCORE_ENCODE_BASE = 100000;
+export const MAX_QUESTIONS_ENCODE = SCORE_ENCODE_BASE - 1;
 export const FEE_WEI = parseEther("0.0002");
 export const QUIZ_ABI = [
   { type: "function", name: "FEE", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
