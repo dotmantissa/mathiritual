@@ -101,13 +101,11 @@ export async function connectWallet(): Promise<Address> {
   if (!eth) throw new Error("No wallet. Install MetaMask.");
   const accounts: string[] = await eth.request({ method: "eth_requestAccounts" });
   await ensureRitualChain();
-  return accounts[0] as Address;
-}
-
 export type ScoreEntry = {
   player: string;
   discord: string;
   score: number;
+  questions: number;
   timestamp: number;
   txHash: string;
 };
@@ -119,6 +117,18 @@ async function getFromBlockForWindow(seconds: number): Promise<bigint> {
   const back = BigInt(Math.ceil(seconds / RITUAL_AVG_BLOCK_SEC));
   const candidate = latest > back ? latest - back : 0n;
   return candidate < DEPLOY_BLOCK ? DEPLOY_BLOCK : candidate;
+}
+
+export function encodeScore(realScore: number, questions: number): bigint {
+  const q = Math.max(0, Math.min(MAX_QUESTIONS_ENCODE, Math.floor(questions)));
+  return BigInt(Math.floor(realScore)) * BigInt(SCORE_ENCODE_BASE) + BigInt(q);
+}
+
+export function decodeScore(encoded: number): { score: number; questions: number } {
+  return {
+    score: Math.floor(encoded / SCORE_ENCODE_BASE),
+    questions: encoded % SCORE_ENCODE_BASE,
+  };
 }
 
 export async function fetchScores(windowSeconds: number): Promise<ScoreEntry[]> {
@@ -142,20 +152,25 @@ export async function fetchScores(windowSeconds: number): Promise<ScoreEntry[]> 
   const cutoff = Math.max(windowCutoff, LEADERBOARD_RESET_AT);
   const all: ScoreEntry[] = logs.map((l) => {
     const args = l.args as any;
+    const encoded = Number(args.score);
+    const { score, questions } = decodeScore(encoded);
     return {
       player: args.player as string,
       discord: args.discord as string,
-      score: Number(args.score),
+      score,
+      questions,
       timestamp: Number(args.timestamp),
       txHash: l.transactionHash!,
     };
   }).filter((e) => e.timestamp >= cutoff);
 
-  // Latest save wins per (discord lowercased) — always overwrite previous.
   all.sort((a, b) => a.timestamp - b.timestamp);
   const map = new Map<string, ScoreEntry>();
   for (const e of all) {
     map.set(e.discord.toLowerCase(), e);
+  }
+  return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 50);
+}
   }
   return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 50);
 }
