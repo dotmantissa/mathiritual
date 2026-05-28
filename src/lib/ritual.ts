@@ -12,7 +12,10 @@ export const CONTRACT_ADDRESS = "0x205336D124145881e00dad29aAA9669F739684B2" as 
 export const DEPLOY_BLOCK = 25286727n;
 // Leaderboard reset: only events at or after this Unix timestamp are shown.
 // Bump this to wipe the visible leaderboard without redeploying.
-export const LEADERBOARD_RESET_AT = 1779062400; // 2026-05-28 UTC
+export const LEADERBOARD_RESET_AT = 1779235200; // 2026-05-30 UTC — bumped to wipe board
+// Encoding: on-chain `score` arg = realScore * SCORE_ENCODE_BASE + questionsAnswered
+export const SCORE_ENCODE_BASE = 100000;
+export const MAX_QUESTIONS_ENCODE = SCORE_ENCODE_BASE - 1;
 export const FEE_WEI = parseEther("0.0002");
 export const QUIZ_ABI = [
   { type: "function", name: "FEE", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
@@ -98,13 +101,11 @@ export async function connectWallet(): Promise<Address> {
   if (!eth) throw new Error("No wallet. Install MetaMask.");
   const accounts: string[] = await eth.request({ method: "eth_requestAccounts" });
   await ensureRitualChain();
-  return accounts[0] as Address;
-}
-
 export type ScoreEntry = {
   player: string;
   discord: string;
   score: number;
+  questions: number;
   timestamp: number;
   txHash: string;
 };
@@ -116,6 +117,18 @@ async function getFromBlockForWindow(seconds: number): Promise<bigint> {
   const back = BigInt(Math.ceil(seconds / RITUAL_AVG_BLOCK_SEC));
   const candidate = latest > back ? latest - back : 0n;
   return candidate < DEPLOY_BLOCK ? DEPLOY_BLOCK : candidate;
+}
+
+export function encodeScore(realScore: number, questions: number): bigint {
+  const q = Math.max(0, Math.min(MAX_QUESTIONS_ENCODE, Math.floor(questions)));
+  return BigInt(Math.floor(realScore)) * BigInt(SCORE_ENCODE_BASE) + BigInt(q);
+}
+
+export function decodeScore(encoded: number): { score: number; questions: number } {
+  return {
+    score: Math.floor(encoded / SCORE_ENCODE_BASE),
+    questions: encoded % SCORE_ENCODE_BASE,
+  };
 }
 
 export async function fetchScores(windowSeconds: number): Promise<ScoreEntry[]> {
@@ -139,16 +152,18 @@ export async function fetchScores(windowSeconds: number): Promise<ScoreEntry[]> 
   const cutoff = Math.max(windowCutoff, LEADERBOARD_RESET_AT);
   const all: ScoreEntry[] = logs.map((l) => {
     const args = l.args as any;
+    const encoded = Number(args.score);
+    const { score, questions } = decodeScore(encoded);
     return {
       player: args.player as string,
       discord: args.discord as string,
-      score: Number(args.score),
+      score,
+      questions,
       timestamp: Number(args.timestamp),
       txHash: l.transactionHash!,
     };
   }).filter((e) => e.timestamp >= cutoff);
 
-  // Latest save wins per (discord lowercased) — always overwrite previous.
   all.sort((a, b) => a.timestamp - b.timestamp);
   const map = new Map<string, ScoreEntry>();
   for (const e of all) {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CONTRACT_ADDRESS, FEE_WEI, QUIZ_ABI, connectWallet, ensureRitualChain, getWalletClient, publicClient } from "@/lib/ritual";
+import { CONTRACT_ADDRESS, FEE_WEI, QUIZ_ABI, connectWallet, encodeScore, ensureRitualChain, getWalletClient, publicClient } from "@/lib/ritual";
 import { generateProblem, pointsForAnswer, type Problem } from "@/lib/quiz";
 import { Leaderboard } from "./Leaderboard";
 
@@ -142,12 +142,13 @@ export function MathQuiz() {
       setError(null);
       setPhase("saving");
       const wallet = getWalletClient();
+      const encoded = encodeScore(score, questionNo);
       const hash = await wallet.writeContract({
         account: address as `0x${string}`,
         address: CONTRACT_ADDRESS,
         abi: QUIZ_ABI,
         functionName: "submitScore",
-        args: [discord.trim(), BigInt(score)],
+        args: [discord.trim(), encoded],
       });
       await publicClient.waitForTransactionReceipt({ hash });
       setSaveTx(hash);
