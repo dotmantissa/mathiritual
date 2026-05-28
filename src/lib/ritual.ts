@@ -101,6 +101,10 @@ export async function connectWallet(): Promise<Address> {
   if (!eth) throw new Error("No wallet. Install MetaMask.");
   const accounts: string[] = await eth.request({ method: "eth_requestAccounts" });
   await ensureRitualChain();
+  return accounts[0] as Address;
+}
+
+
 export type ScoreEntry = {
   player: string;
   discord: string;
