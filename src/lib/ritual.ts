@@ -10,8 +10,10 @@ export const RITUAL_CHAIN = defineChain({
 
 export const CONTRACT_ADDRESS = "0x205336D124145881e00dad29aAA9669F739684B2" as const;
 export const DEPLOY_BLOCK = 25286727n;
+// Leaderboard reset: only events at or after this Unix timestamp are shown.
+// Bump this to wipe the visible leaderboard without redeploying.
+export const LEADERBOARD_RESET_AT = 1779062400; // 2026-05-28 UTC
 export const FEE_WEI = parseEther("0.0002");
-
 export const QUIZ_ABI = [
   { type: "function", name: "FEE", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
   {
@@ -133,7 +135,8 @@ export async function fetchScores(windowSeconds: number): Promise<ScoreEntry[]> 
     fromBlock,
     toBlock: "latest",
   });
-  const cutoff = Math.floor(Date.now() / 1000) - windowSeconds;
+  const windowCutoff = Math.floor(Date.now() / 1000) - windowSeconds;
+  const cutoff = Math.max(windowCutoff, LEADERBOARD_RESET_AT);
   const all: ScoreEntry[] = logs.map((l) => {
     const args = l.args as any;
     return {
@@ -145,12 +148,11 @@ export async function fetchScores(windowSeconds: number): Promise<ScoreEntry[]> 
     };
   }).filter((e) => e.timestamp >= cutoff);
 
-  // Keep highest score per (discord lowercased)
+  // Latest save wins per (discord lowercased) — always overwrite previous.
+  all.sort((a, b) => a.timestamp - b.timestamp);
   const map = new Map<string, ScoreEntry>();
   for (const e of all) {
-    const key = e.discord.toLowerCase();
-    const prev = map.get(key);
-    if (!prev || e.score > prev.score) map.set(key, e);
+    map.set(e.discord.toLowerCase(), e);
   }
   return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 50);
 }
