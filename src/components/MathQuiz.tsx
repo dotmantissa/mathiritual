@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CONTRACT_ADDRESS, FEE_WEI, QUIZ_ABI, connectWallet, ensureRitualChain, getWalletClient, publicClient } from "@/lib/ritual";
+import { CONTRACT_ADDRESS, FEE_WEI, QUIZ_ABI, connectWallet, encodeScore, ensureRitualChain, getWalletClient, publicClient } from "@/lib/ritual";
 import { generateProblem, pointsForAnswer, type Problem } from "@/lib/quiz";
 import { Leaderboard } from "./Leaderboard";
 
