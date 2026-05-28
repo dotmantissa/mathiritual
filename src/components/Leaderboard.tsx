@@ -46,30 +46,39 @@ export function Leaderboard() {
         <p className="text-sm text-ritual-text/60">No scores yet — be the first.</p>
       )}
       {!loading && rows.length > 0 && (
-        <ol className="space-y-1.5 max-h-96 overflow-y-auto pr-1">
-          {rows.map((r, i) => (
-            <li
-              key={r.txHash}
-              className="flex items-center justify-between gap-3 rounded-lg bg-ritual-deep/60 px-3 py-2 text-sm"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <span className={`w-6 text-center font-mono ${i < 3 ? "text-ritual-accent font-bold" : "text-ritual-text/50"}`}>
-          {rows.map((r, i) => (
-            <li
-              key={r.txHash}
-              className="flex items-center justify-between gap-3 rounded-lg bg-ritual-deep/60 px-3 py-2 text-sm"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <span className={`w-6 text-center font-mono ${i < 3 ? "text-ritual-accent font-bold" : "text-ritual-text/50"}`}>
-                  {i + 1}
-                </span>
-                <span className="truncate text-ritual-text">{r.discord}</span>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="text-[10px] uppercase tracking-wide text-ritual-text/50 font-mono">
-                  {r.questions} Q
-                </span>
-                <span className="font-mono font-semibold text-ritual-accent">{r.score}</span>
-              </div>
-            </li>
-          ))}
+        <>
+          <div className="flex items-center justify-between px-3 pb-2 text-[10px] uppercase tracking-wide text-ritual-text/40 font-mono">
+            <span>Player</span>
+            <span className="flex items-center gap-3">
+              <span>Questions</span>
+              <span>Score</span>
+            </span>
+          </div>
+          <ol className="space-y-1.5 max-h-96 overflow-y-auto pr-1">
+            {rows.map((r, i) => (
+              <li
+                key={r.txHash}
+                className="flex items-center justify-between gap-3 rounded-lg bg-ritual-deep/60 px-3 py-2 text-sm"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className={`w-6 text-center font-mono ${i < 3 ? "text-ritual-accent font-bold" : "text-ritual-text/50"}`}>
+                    {i + 1}
+                  </span>
+                  <span className="truncate text-ritual-text">{r.discord}</span>
+                </div>
+                <div className="flex items-center gap-4 shrink-0">
+                  <span className="font-mono text-xs text-ritual-text/70 tabular-nums w-10 text-right">
+                    {r.questions}
+                  </span>
+                  <span className="font-mono font-semibold text-ritual-accent tabular-nums w-14 text-right">
+                    {r.score}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
+    </div>
+  );
+}
