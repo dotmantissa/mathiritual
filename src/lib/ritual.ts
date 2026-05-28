@@ -171,8 +171,5 @@ export async function fetchScores(windowSeconds: number): Promise<ScoreEntry[]> 
   }
   return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 50);
 }
-  }
-  return [...map.values()].sort((a, b) => b.score - a.score).slice(0, 50);
-}
 
 export { formatEther, parseEther };
